@@ -1,0 +1,55 @@
+{
+    "name": "log-getter-kitaro",
+    "version": "1.0.0",
+    "description": "get gziplogs",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "pack:osx": "electron-builder --mac --x64",
+        "pack:win": "electron-builder --win --x64"
+    },
+    "keywords": [],
+    "author": "kitaro",
+    "license": "ISC",
+    "dependencies": {
+        "aws-sdk": "^2.694.0",
+        "electron-reload": "^1.5.0",
+        "electron-store": "^5.2.0",
+        "spectre.css": "^0.5.8"
+    },
+    "devDependencies": {
+        "electron": "^9.0.3",
+        "electron-builder": "^22.7.0",
+        "prettier": "^2.0.5"
+    },
+    "build": {
+        "appId": "com.electron.log-getter-kitaro",
+        "mac": {
+            "icon": "assets/mac/icon.icns",
+            "target": [
+                "dmg"
+            ]
+        },
+        "win": {
+            "icon": "assets/win/icon.ico",
+            "target": "nsis"
+        },
+        "directories": {
+            "output": "docs"
+        },
+        "files": [
+            "assets",
+            "renderer",
+            "package.json",
+            "package-lock.json",
+            "DataStore.js",
+            "main.js",
+            "Window.js"
+        ],
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        }
+    }
+}
