@@ -21,16 +21,17 @@ document.querySelector('#getS3').addEventListener('click', async () => {
     await getS3();
 });
 
-document.querySelector('#saveFile').addEventListener('click', async () => {
-    await saveFile();
-});
-
 const getS3 = async () => {
     try {
         const accessKey = document.getElementById('input-accessKey').value;
         const secretKey = document.getElementById('input-secretKey').value;
         const bucket = document.getElementById('input-bucket').value;
         const key = document.getElementById('input-key').value;
+
+        document.getElementById('input-accessKey').disabled = true;
+        document.getElementById('input-secretKey').disabled = true;
+        document.getElementById('input-bucket').disabled = true;
+        document.getElementById('input-key').disabled = true;
 
         aws.config.update({
             region: 'ap-northeast-1',
@@ -49,15 +50,23 @@ const getS3 = async () => {
             s3Object => s3Object.Size > 0,
         );
 
-        const preview = document.getElementById('preview');
+        let preview = document.getElementById('preview');
+        preview.textContent = 'start\n';
+        let savetext = '';
 
-        for (let s3Object of s3Objects) {
+        for (const [index, s3Object] of s3Objects.entries()) {
             let getparams = { Bucket: bucket, Key: s3Object.Key };
             let data = await s3.getObject(getparams).promise();
             var result = zlib.gunzipSync(data.Body).toString('utf-8');
-            preview.textContent += result;
-            preview.textContent += '\n';
+            preview.textContent += index + 1 + '/' + s3Objects.length + '\n';
+            preview.scrollTop = preview.scrollHeight;
+            savetext += result;
+            savetext += '\n';
         }
+
+        preview.textContent += 'complete!';
+        await saveFile(savetext);
+
         ipcRenderer.send('savesetting', {
             accessKey: accessKey,
             secretKey: secretKey,
@@ -71,7 +80,7 @@ const getS3 = async () => {
 };
 
 //saveFileボタンが押されたとき
-const saveFile = async () => {
+const saveFile = async (savetext) => {
     const win = BrowserWindow.getFocusedWindow();
     const fileName = dialog.showSaveDialogSync(win, {
         properties: ['openFile'],
@@ -83,10 +92,7 @@ const saveFile = async () => {
         ],
     });
     if (fileName) {
-        const preview = document.getElementById('preview');
-        const data = preview.textContent;
-        console.log(data);
-        writeFile(fileName, data);
+        writeFile(fileName, savetext);
     }
 };
 
