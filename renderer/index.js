@@ -65,6 +65,7 @@ const getS3 = async () => {
         }
 
         preview.textContent += 'complete!';
+        preview.scrollTop = preview.scrollHeight;
         await saveFile(savetext);
 
         ipcRenderer.send('savesetting', {
@@ -76,32 +77,32 @@ const getS3 = async () => {
     } catch (e) {
         console.error(e);
         alert('s3 error.\n' + e);
+    } finally {
+        document.getElementById('input-accessKey').disabled = false;
+        document.getElementById('input-secretKey').disabled = false;
+        document.getElementById('input-bucket').disabled = false;
+        document.getElementById('input-key').disabled = false;
     }
 };
 
 //saveFileボタンが押されたとき
-const saveFile = async (savetext) => {
-    const win = BrowserWindow.getFocusedWindow();
-    const fileName = dialog.showSaveDialogSync(win, {
-        properties: ['openFile'],
-        filters: [
-            {
-                name: 'Document',
-                extensions: ['txt'],
-            },
-        ],
-    });
-    if (fileName) {
-        writeFile(fileName, savetext);
-    }
-};
-
-//fileを保存（Pathと内容を指定）
-const writeFile = async (path, data) => {
-    fs.writeFile(path, data, error => {
-        if (error != null) {
-            alert('save error.');
-            return;
+const saveFile = async savetext => {
+    try {
+        const win = BrowserWindow.getFocusedWindow();
+        const fileName = dialog.showSaveDialogSync(win, {
+            properties: ['openFile'],
+            filters: [
+                {
+                    name: 'Document',
+                    extensions: ['txt'],
+                },
+            ],
+        });
+        if (fileName) {
+            fs.writeFileSync(fileName, savetext, { flags: 'w' });
         }
-    });
+    } catch (e) {
+        alert('save error.');
+        return;
+    }
 };
